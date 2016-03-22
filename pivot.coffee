@@ -6,7 +6,7 @@ callWithJQuery = (pivotModule) ->
     # Plain browser env
     else
         pivotModule jQuery
-        
+
 callWithJQuery ($) ->
 
     ###
@@ -23,8 +23,8 @@ callWithJQuery ($) ->
         return x1 + x2
 
     numberFormat = (opts) ->
-        defaults = 
-            digitsAfterDecimal: 2, scaler: 1, 
+        defaults =
+            digitsAfterDecimal: 2, scaler: 1,
             thousandsSep: ",", decimalSep: "."
             prefix: "", suffix: ""
             showZero: false
@@ -79,7 +79,7 @@ callWithJQuery ($) ->
 
         max: (formatter=usFmt) -> ([attr]) -> (data, rowKey, colKey) ->
             val: null
-            push: (record) -> 
+            push: (record) ->
                 x = parseFloat(record[attr])
                 if not isNaN x then @val = Math.max(x, @val ? x)
             value: -> @val
@@ -130,7 +130,7 @@ callWithJQuery ($) ->
             numInputs: wrapped(x...)().numInputs
 
     #default aggregators & renderers use US naming and number formatting
-    aggregators = do (tpl = aggregatorTemplates) -> 
+    aggregators = do (tpl = aggregatorTemplates) ->
         "Count":                tpl.count(usFmtInt)
         "Count Unique Values":  tpl.countUnique(usFmtInt)
         "List Unique Values":   tpl.listUnique(", ")
@@ -156,11 +156,11 @@ callWithJQuery ($) ->
         "Row Heatmap":    (pvtData, opts) -> $(pivotTableRenderer(pvtData, opts)).heatmap("rowheatmap")
         "Col Heatmap":    (pvtData, opts) -> $(pivotTableRenderer(pvtData, opts)).heatmap("colheatmap")
 
-    locales = 
-        en: 
+    locales =
+        en:
             aggregators: aggregators
             renderers: renderers
-            localeStrings: 
+            localeStrings:
                 renderError: "An error occurred rendering the PivotTable results."
                 computeError: "An error occurred computing the PivotTable results."
                 uiRenderError: "An error occurred rendering the PivotTable UI."
@@ -221,7 +221,7 @@ callWithJQuery ($) ->
                     return (if a1 > b1 then 1 else -1)
         a.length - b.length
 
-    sortAs = (order) -> 
+    sortAs = (order) ->
         mapping = {}
         for i, x of order
             mapping[x] = i
@@ -238,7 +238,7 @@ callWithJQuery ($) ->
     getSort = (sorters, attr) ->
         sort = sorters(attr)
         if $.isFunction(sort)
-            return sort 
+            return sort
         else
             return naturalSort
 
@@ -271,7 +271,7 @@ callWithJQuery ($) ->
             if $.isEmptyObject derivedAttributes
                 addRecord = f
             else
-                addRecord = (record) -> 
+                addRecord = (record) ->
                     record[k] = v(record) ? record[k] for k, v of derivedAttributes
                     f(record)
 
@@ -302,9 +302,9 @@ callWithJQuery ($) ->
             PivotData.forEachRecord input, {}, (record) -> result.push record
             return result
 
-        arrSort: (attrs) => 
+        arrSort: (attrs) =>
             sortersArr = (getSort(@sorters, a) for a in attrs)
-            (a,b) -> 
+            (a,b) ->
                 for own i, sorter of sortersArr
                     comparison = sorter(a[i], b[i])
                     return comparison if comparison != 0
@@ -327,7 +327,7 @@ callWithJQuery ($) ->
         processRecord: (record) -> #this code is called in a tight loop
             colKey = []
             rowKey = []
-            colKey.push record[x] ? "null" for x in @colAttrs 
+            colKey.push record[x] ? "null" for x in @colAttrs
             rowKey.push record[x] ? "null" for x in @rowAttrs
             flatRowKey = rowKey.join(String.fromCharCode(0))
             flatColKey = colKey.join(String.fromCharCode(0))
@@ -391,24 +391,6 @@ callWithJQuery ($) ->
         result = document.createElement("table")
         result.className = "pvtTable"
 
-        #helper function for setting row/col-span in pivotTableRenderer
-        spanSize = (arr, i, j) ->
-            if i != 0
-                noDraw = true
-                for x in [0..j]
-                    if arr[i-1][x] != arr[i][x]
-                        noDraw = false
-                if noDraw
-                  return -1 #do not draw cell
-            len = 0
-            while i+len < arr.length
-                stop = false
-                for x in [0..j]
-                    stop = true if arr[i][x] != arr[i+len][x]
-                break if stop
-                len++
-            return len
-
         #the first few rows are for col headers
         for own j, c of colAttrs
             tr = document.createElement("tr")
@@ -454,68 +436,109 @@ callWithJQuery ($) ->
             tr.appendChild th
             result.appendChild tr
 
-        #now the actual data rows, with their row headers and totals
-        for own i, rowKey of rowKeys
-            tr = document.createElement("tr")
-            for own j, txt of rowKey
-                x = spanSize(rowKeys, parseInt(i), parseInt(j))
-                if x != -1
-                    th = document.createElement("th")
-                    th.className = "pvtRowLabel"
-                    th.textContent = txt
-                    th.setAttribute("rowspan", x)
-                    if parseInt(j) == rowAttrs.length-1 and colAttrs.length !=0
-                        th.setAttribute("colspan",2)
-                    tr.appendChild th
-            for own j, colKey of colKeys #this is the tight loop
-                aggregator = pivotData.getAggregator(rowKey, colKey)
-                val = aggregator.value()
+        pivotInterval = null
+        i = 0
+        keyCount = rowKeys.length
+        window.pivotState = true
+        $("#stop-pivot").show();
+        $("#resume-pivot").hide();
+        $("#pivot-progress").addClass("active");
+        $("#pivot-progress").css('width', '0%')
+        $("#pivot-progress").text('0%')
+        $("#pivot-progress").parents().eq(2).show()
+        pivotInterval = setInterval(->
+            if window.pivotState
+                if {}.hasOwnProperty.call(rowKeys, i)
+                    rowKey = rowKeys[i]
+                    tr = document.createElement("tr")
+                    for own j, txt of rowKey
+                        x = spanSize(rowKeys, parseInt(i), parseInt(j))
+                        if x != -1
+                            th = document.createElement("th")
+                            th.className = "pvtRowLabel"
+                            th.textContent = txt
+                            th.setAttribute("rowspan", x)
+                            if parseInt(j) == rowAttrs.length-1 and colAttrs.length !=0
+                                th.setAttribute("colspan",2)
+                            tr.appendChild th
+                    for own j, colKey of colKeys #this is the tight loop
+                        aggregator = pivotData.getAggregator(rowKey, colKey)
+                        val = aggregator.value()
+                        td = document.createElement("td")
+                        td.className = "pvtVal row#{i} col#{j}"
+                        td.textContent = aggregator.format(val)
+                        td.setAttribute("data-value", val)
+                        tr.appendChild td
+
+                    totalAggregator = pivotData.getAggregator(rowKey, [])
+                    val = totalAggregator.value()
+                    td = document.createElement("td")
+                    td.className = "pvtTotal rowTotal"
+                    td.textContent = totalAggregator.format(val)
+                    td.setAttribute("data-value", val)
+                    td.setAttribute("data-for", "row"+i)
+                    tr.appendChild td
+                    result.appendChild tr
+
+                    percentProgress = Math.round(10000 * (i+1) / keyCount + 0.00001) / 100
+                    $("#pivot-progress").css('width', percentProgress + '%')
+                    $("#pivot-progress").text((i+1) + ' of ' + keyCount + ' (' + percentProgress + '%)');
+                i++
+            if i >= keyCount
+                #finally, the row for col totals, and a grand total
+                tr = document.createElement("tr")
+                th = document.createElement("th")
+                th.className = "pvtTotalLabel"
+                th.innerHTML = opts.localeStrings.totals
+                th.setAttribute("colspan", rowAttrs.length + (if colAttrs.length == 0 then 0 else 1))
+                tr.appendChild th
+                for own j, colKey of colKeys
+                    totalAggregator = pivotData.getAggregator([], colKey)
+                    val = totalAggregator.value()
+                    td = document.createElement("td")
+                    td.className = "pvtTotal colTotal"
+                    td.textContent = totalAggregator.format(val)
+                    td.setAttribute("data-value", val)
+                    td.setAttribute("data-for", "col"+j)
+                    tr.appendChild td
+                totalAggregator = pivotData.getAggregator([], [])
+                val = totalAggregator.value()
                 td = document.createElement("td")
-                td.className = "pvtVal row#{i} col#{j}"
-                td.textContent = aggregator.format(val)
+                td.className = "pvtGrandTotal"
+                td.textContent = totalAggregator.format(val)
                 td.setAttribute("data-value", val)
                 tr.appendChild td
+                result.appendChild tr
 
-            totalAggregator = pivotData.getAggregator(rowKey, [])
-            val = totalAggregator.value()
-            td = document.createElement("td")
-            td.className = "pvtTotal rowTotal"
-            td.textContent = totalAggregator.format(val)
-            td.setAttribute("data-value", val)
-            td.setAttribute("data-for", "row"+i)
-            tr.appendChild td
-            result.appendChild tr
+                #squirrel this away for later
+                result.setAttribute("data-numrows", rowKeys.length)
+                result.setAttribute("data-numcols", colKeys.length)
 
-        #finally, the row for col totals, and a grand total
-        tr = document.createElement("tr")
-        th = document.createElement("th")
-        th.className = "pvtTotalLabel"
-        th.innerHTML = opts.localeStrings.totals
-        th.setAttribute("colspan", rowAttrs.length + (if colAttrs.length == 0 then 0 else 1))
-        tr.appendChild th
-        for own j, colKey of colKeys
-            totalAggregator = pivotData.getAggregator([], colKey)
-            val = totalAggregator.value()
-            td = document.createElement("td")
-            td.className = "pvtTotal colTotal"
-            td.textContent = totalAggregator.format(val)
-            td.setAttribute("data-value", val)
-            td.setAttribute("data-for", "col"+j)
-            tr.appendChild td
-        totalAggregator = pivotData.getAggregator([], [])
-        val = totalAggregator.value()
-        td = document.createElement("td")
-        td.className = "pvtGrandTotal"
-        td.textContent = totalAggregator.format(val)
-        td.setAttribute("data-value", val)
-        tr.appendChild td
-        result.appendChild tr
+                $("#pivot-progress").parents().eq(2).hide()
 
-        #squirrel this away for later
-        result.setAttribute("data-numrows", rowKeys.length)
-        result.setAttribute("data-numcols", colKeys.length)
+                clearInterval(pivotInterval)
 
+            return
+        , 1);
         return result
+
+    #helper function for setting row/col-span in pivotTableRenderer
+    spanSize = (arr, i, j) ->
+        if i != 0
+            noDraw = true
+            for x in [0..j]
+                if arr[i-1][x] != arr[i][x]
+                    noDraw = false
+            if noDraw
+                return -1 #do not draw cell
+        len = 0
+        while i+len < arr.length
+            stop = false
+            for x in [0..j]
+                stop = true if arr[i][x] != arr[i+len][x]
+            break if stop
+            len++
+        return len
 
     ###
     Pivot Table core: create PivotData object and call Renderer on it
@@ -529,7 +552,7 @@ callWithJQuery ($) ->
             filter: -> true
             aggregator: aggregatorTemplates.count()()
             aggregatorName: "Count"
-            sorters: -> 
+            sorters: ->
             derivedAttributes: {},
             renderer: pivotTableRenderer
             rendererOptions: null
@@ -548,7 +571,7 @@ callWithJQuery ($) ->
         catch e
             console.error(e.stack) if console?
             result = $("<span>").html opts.localeStrings.computeError
-        
+
         x = this[0]
         x.removeChild(x.lastChild) while x.hasChildNodes()
         return @append result
@@ -575,7 +598,7 @@ callWithJQuery ($) ->
             rendererOptions: localeStrings: locales[locale].localeStrings
             onRefresh: null
             filter: -> true
-            sorters: -> 
+            sorters: ->
             localeStrings: locales[locale].localeStrings
 
         existingOpts = @data "pivotUIOptions"

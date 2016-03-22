@@ -1,4 +1,4 @@
-[![npm](http://nicolas.kruchten.com/pivottable/images/npm.svg)](https://www.npmjs.com/package/pivottable) [![cdnjs](http://nicolas.kruchten.com/pivottable/images/cdnjs.svg)](https://cdnjs.com/libraries/pivottable) [![tests](http://nicolas.kruchten.com/pivottable/images/tests.svg)](http://nicolas.kruchten.com/pivottable/tests/) [![license](http://nicolas.kruchten.com/pivottable/images/license.svg)](https://github.com/nicolaskruchten/pivottable/blob/master/LICENSE.md)
+[![npm](https://img.shields.io/badge/npm-pivottable-red.svg)](https://www.npmjs.com/package/pivottable) [![cdnjs](https://img.shields.io/badge/cdnjs-pivottable-orange.svg)](https://cdnjs.com/libraries/pivottable) [![tests](https://img.shields.io/badge/tests-jasmine-green.svg)](http://nicolas.kruchten.com/pivottable/tests/) [![license](https://img.shields.io/badge/license-mit-blue.svg)](https://github.com/nicolaskruchten/pivottable/blob/master/LICENSE.md)
 
 
 # PivotTable.js
@@ -17,15 +17,6 @@ PivotTable.js' basic function is to enable data exploration and analysis by turn
 
 The animation above is based on the [Canadian Parliament 2012 dataset example](http://nicolas.kruchten.com/pivottable/examples/fully_loaded.html).
 
-## Where are the demos/examples?
-
-There are lots on the [examples page](http://nicolas.kruchten.com/pivottable/examples/index.html) but here are some good entry points:
-
-* [a JSFiddle where you can play with the code](https://jsfiddle.net/nicolaskruchten/kn381h7s/)
-* [a simple demo running on the "Canadian Parliament 2012" dataset](http://nicolaskruchten.github.io/pivottable/examples/mps_prepop.html)
-* [fully-loaded demo running on the 700+ datasets that ship with R](http://nicolas.kruchten.com/pivottable/examples/rcsvs.html)
-* [fully-loaded demo where you provide your own CSV file for input](http://nicolas.kruchten.com/pivottable/examples/local.html)
-
 ## Why is it good?
 
 * it's lightweight: the core (without chart support) is a single file with less than 1000 LOC of CoffeeScript, compiles down to 6.3kb of Javascript minified and gzipped, and depends only on jQuery and jQueryUI's 'sortable'
@@ -40,6 +31,14 @@ There are lots on the [examples page](http://nicolas.kruchten.com/pivottable/exa
 * its extension points allow aggregation functions, table output, UI and visualizations to be tailored to specific applications
 * it works on mobile devices with [jQuery UI Touch Punch](http://touchpunch.furf.com/)
 * it has a [test suite](http://nicolas.kruchten.com/pivottable/tests)
+
+## Where are the demos/examples?
+
+There are lots on the [examples page](http://nicolas.kruchten.com/pivottable/examples/index.html) but here are some good entry points:
+
+* [a simple demo running on the "Canadian Parliament 2012" dataset](http://nicolaskruchten.github.io/pivottable/examples/mps_prepop.html)
+* [fully-loaded demo running on the 700+ datasets that ship with R](http://nicolas.kruchten.com/pivottable/examples/rcsvs.html)
+* [fully-loaded demo where you provide a CSV file for input](http://nicolaskruchten.github.io/pivottable/examples/fully_loaded.html)
 
 ## How do I use the UI?
 
@@ -110,7 +109,7 @@ $("#output").pivotUI(
 
 ![image](http://nicolaskruchten.github.io/pivottable/images/simple_ui.png)
 
-Note that **`pivot()` and `pivotUI()` take different parameters in general**, even though in the example above we passed the same parameters to both. See the [FAQ](https://github.com/nicolaskruchten/pivottable/wiki/Frequently-Asked-Questions#params).
+Note that **`pivot()` and `pivotUI()` take different parameters in general**, even though in the example above we passed the same parameters to both.
 
 See the wiki for [full parameter documentation](https://github.com/nicolaskruchten/pivottable/wiki/Parameters).
 
