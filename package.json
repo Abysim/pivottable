@@ -1,7 +1,7 @@
 {
   "name": "pivottable",
-  "version": "2.0.2",
-  "description": "Javascript Pivot Table (aka Pivot Grid, Pivot Chart, Cross-Tab) implementation with drag'n'drop",
+  "version": "2.0.2.1",
+  "description": "Javascript Pivot Table (aka Pivot Grid, Pivot Chart, Cross-Tab) implementation with drag'n'drop and progressbar",
   "main": "dist/pivot.js",
   "keywords": [
     "pivot",
@@ -16,14 +16,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/nicolaskruchten/pivottable.git"
+    "url": "git://github.com/Abysim/pivottable.git"
   },
-  "author": "Nicolas Kruchten",
+  "author": "Andrii Kalmus",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nicolaskruchten/pivottable/issues"
+    "url": "https://github.com/Abysim/pivottable/issues"
   },
-  "homepage": "https://github.com/nicolaskruchten/pivottable",
+  "homepage": "https://github.com/Abysim/pivottable",
   "dependencies": {
     "jquery": ">=1.9.0"
   },
